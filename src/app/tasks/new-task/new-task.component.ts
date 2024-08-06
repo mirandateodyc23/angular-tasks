@@ -1,32 +1,42 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { Task } from '../task/task.model';
+import { Component, EventEmitter, inject, Input, Output } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+
+import { type NewTaskData } from '../task/task.model';
+import { TasksService } from '../tasks.service';
 
 @Component({
   selector: 'app-new-task',
   standalone: true,
-  imports: [],
+  imports: [FormsModule],
   templateUrl: './new-task.component.html',
-  styleUrl: './new-task.component.css'
+  styleUrls: ['./new-task.component.css', '../tasks.component.css']
 })
 export class NewTaskComponent {
+  @Input({ required: true }) userId!: string;
+  @Output() close = new EventEmitter<void>();
 
-  @Input() newtask!: Task;
-  @Output() addtask = new EventEmitter();
-  @Input() selectedId!: string;
+  enteredTitle = '';
+  enteredSummary = '';
+  enteredDate = '';
+  private tasksService = inject(TasksService)
 
-  @Input() lastUserTaskId!: number;
 
-
-  onAddTask() {
-    this.newtask = 
-    {
-      id: 't' + this.lastUserTaskId,
-      userId: this.selectedId,
-      title: 't' + this.lastUserTaskId + "New Added Task" + "for User " + this.selectedId,
-      summary: 't' + this.lastUserTaskId + "New Added Task" + "for User " + this.selectedId,
-      dueDate: "2024-08-31"
-    }
-    this.addtask.emit(this.newtask);
+  onCancel() {
+    this.close.emit();
   }
+
+  onSubmit() {
+    this.tasksService.addTask(
+      {
+        title: this.enteredTitle,
+        summary: this.enteredSummary,
+        date: this.enteredDate,
+      },
+      this.userId
+    )
+    this.close.emit();
+  };
+
+
 
 }
